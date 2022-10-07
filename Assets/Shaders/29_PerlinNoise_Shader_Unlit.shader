@@ -1,4 +1,4 @@
-Shader "Unlit/27_Noise_Shader_Unlit"
+Shader "Unlit/29_PerlinNoise_Shader_Unlit"
 {
     Properties
     {
@@ -16,12 +16,21 @@ Shader "Unlit/27_Noise_Shader_Unlit"
 
             #include "UnityCG.cginc"
             #include "./shared/SimpleV2F.cginc"
-            #include "./shared/Random.cginc"
+            #include "./shared/PerlinNoise.cginc"
 
             fixed4 frag (v2f i) : SV_Target
             {
-                fixed3 color = random(i.uv, _Time.x) * fixed3(1,1,1);
-                return fixed4(color,1);
+                float2 p = i.uv;
+
+                float perlinNoise = perlin(
+                    p,
+                    float2(0,1),
+                    float2(0,1),
+                    float2(-1,1),
+                    float2(1,-1)
+                );
+
+                return fixed4(fixed3(1,1,1),1) * perlinNoise;
             }
             ENDCG
         }
