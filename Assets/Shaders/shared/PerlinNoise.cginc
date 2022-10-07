@@ -34,6 +34,15 @@ float weight(float2 x, float2 a, float2 b)
     return length(x - a) / length(b - a);
 }
 
+// pseudo gradient
+// float2 gradient(float x, float y)
+// {
+//     return float2(
+//         sin(random(float2(x,y), 12585.33)),
+//         cos(random(float2(x,y), 65546.43))
+//     );
+// }
+
 // perlin noise
 // https://adrianb.io/2014/08/09/perlinnoise.html
 float perlin(
@@ -42,13 +51,39 @@ float perlin(
     float2 gradientB,
     float2 gradientC,
     float2 gradientD
+    // float2 uv,
+    // int columns,
+    // int rows
 )
 {
+    // determine which quadrant
+    // float m = 2000; // multiplier
+    // float uvsPerCol = m / columns; // uvs per column
+    // float uvsPerRow = m / rows; // uvs per row
+
+    // int column = floor((uv.x * m) / uvsPerCol);
+    // int row = floor((uv.y * m) / uvsPerRow);
+
+    // // translate point to local quadrant coordinates
+    // float2 p = float2(
+    //     ((uv.x * m) % uvsPerCol) / uvsPerCol,
+    //     ((uv.y * m) % uvsPerRow) / uvsPerRow
+    // );
+
     // corners
     float2 a = float2(0,1);
     float2 b = float2(1,1);
     float2 c = float2(0,0);
     float2 d = float2(1,0);
+
+    // gradients
+    // float cornerX = row * uvsPerRow;
+    // float cornerY = column * uvsPerCol;
+
+    // float2 gradientA = gradient(cornerX, cornerY + uvsPerRow);
+    // float2 gradientB = gradient(cornerX + uvsPerCol, cornerY + uvsPerRow);
+    // float2 gradientC = gradient(cornerX, cornerY);
+    // float2 gradientD = gradient(cornerX + uvsPerCol, cornerY);
 
     // dot
     float2 ap = p - a;

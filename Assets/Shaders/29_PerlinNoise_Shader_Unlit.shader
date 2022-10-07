@@ -2,6 +2,8 @@ Shader "Unlit/29_PerlinNoise_Shader_Unlit"
 {
     Properties
     {
+        _TilingColumns("Tiling Columns", Integer) = 10
+        _TilingRows("Tiling Rows", Integer) = 10
     }
     SubShader
     {
@@ -18,6 +20,9 @@ Shader "Unlit/29_PerlinNoise_Shader_Unlit"
             #include "./shared/SimpleV2F.cginc"
             #include "./shared/PerlinNoise.cginc"
 
+            int _TilingColumns;
+            int _TilingRows;
+
             fixed4 frag (v2f i) : SV_Target
             {
                 float2 p = i.uv;
@@ -30,7 +35,9 @@ Shader "Unlit/29_PerlinNoise_Shader_Unlit"
                     float2(1,-1)
                 );
 
-                return fixed4(fixed3(1,1,1),1) * perlinNoise;
+                // float perlinNoise = perlin(p, _TilingColumns, _TilingRows)
+
+                return fixed4(1,1,1,1) * perlinNoise;
             }
             ENDCG
         }
