@@ -30,17 +30,19 @@ float isGradientDebugLine(float2 p, float2 corner, float2 gradient, float lineTh
         return 0;
     }
 
-    // if(
-    //     (gradient.y < 0 && d.y > 0) ||
-    //     (gradient.y > 0 && d.y < 0) ||
-    //     (gradient.x < 0 && d.x > 0) ||
-    //     (gradient.x > 0 && d.x < 0)
-    // )
-    // {
-    //     return 0;
-    // }
+    if(
+        (gradient.y < 0 && d.y > 0) ||
+        (gradient.y > 0 && d.y < 0) ||
+        (gradient.x < 0 && d.x > 0) ||
+        (gradient.x > 0 && d.x < 0)
+    )
+    {
+        return 0;
+    }
 
-    return onLine(d.y, gradient.y * d.x, lineThickness, corner);
+    float signOfSlope = sign(gradient.x);
+
+    return onLine(d.y, signOfSlope * gradient.y * d.x, lineThickness);
 }
 
 float isGradientDebugLine(
@@ -56,10 +58,10 @@ float isGradientDebugLine(
 )
 {
     if(
-        isGradientDebugLine(p, a, gradientA) == 1 ||
-        isGradientDebugLine(p, b, gradientB) == 1 ||
-        isGradientDebugLine(p, c, gradientC) == 1 ||
-        isGradientDebugLine(p, d, gradientD) == 1
+        isGradientDebugLine(p, a, gradientA) ||
+        isGradientDebugLine(p, b, gradientB) ||
+        isGradientDebugLine(p, c, gradientC) ||
+        isGradientDebugLine(p, d, gradientD)
     )
     {
         return 1;
