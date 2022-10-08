@@ -1,4 +1,4 @@
-float random(float2 pixel, float seed)
+float random(float2 pixel, float seed = 1)
 {
     // magical hardcoded randomness
 

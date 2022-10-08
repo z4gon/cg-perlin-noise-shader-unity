@@ -1,4 +1,5 @@
 #include "./Random.cginc"
+#include "./PerlinNoiseDebug.cginc"
 
 // S shaped curve for fading values given t between 0 and 1
 float fade(float t)
@@ -34,41 +35,43 @@ float weight(float2 x, float2 a, float2 b)
     return length(x - a) / length(b - a);
 }
 
-// pseudo gradient
-// float2 gradient(float x, float y)
-// {
-//     return float2(
-//         sin(random(float2(x,y), 12585.33)),
-//         cos(random(float2(x,y), 65546.43))
-//     );
-// }
+// pseudo random gradients
+float2 gradient(float x, float y)
+{
+    float index = floor(random(x, y) * 10) % 4;
+    // float index = floor(random(x, y) * 10) % 4;
 
-// perlin noise
+    float2 gradients[] = {
+        float2(-1,1),
+        float2(1,1),
+        float2(1,-1),
+        float2(-1,-1),
+        // float2(0, sqrt(2)),
+        // float2(sqrt(2), 0),
+        // float2(0, -sqrt(2)),
+        // float2(-sqrt(2), 0)
+    };
+
+    return gradients[index];
+}
+
+// perlin noise 0 to 1
 // https://adrianb.io/2014/08/09/perlinnoise.html
-float perlin(
-    float2 p,
-    float2 gradientA,
-    float2 gradientB,
-    float2 gradientC,
-    float2 gradientD
-    // float2 uv,
-    // int columns,
-    // int rows
+fixed4 perlin(
+    float2 pixel,
+    int columns,
+    int rows,
+    bool debugSquares,
+    bool debugGradients
 )
 {
-    // determine which quadrant
-    // float m = 2000; // multiplier
-    // float uvsPerCol = m / columns; // uvs per column
-    // float uvsPerRow = m / rows; // uvs per row
+    // square dimensions
+    float width = 1 / float(columns);
+    float height = 1 / float(rows);
 
-    // int column = floor((uv.x * m) / uvsPerCol);
-    // int row = floor((uv.y * m) / uvsPerRow);
-
-    // // translate point to local quadrant coordinates
-    // float2 p = float2(
-    //     ((uv.x * m) % uvsPerCol) / uvsPerCol,
-    //     ((uv.y * m) % uvsPerRow) / uvsPerRow
-    // );
+    // current square
+    int column = floor(pixel.x / width);
+    int row = floor(pixel.y / height);
 
     // corners
     float2 a = float2(0,1);
@@ -76,24 +79,30 @@ float perlin(
     float2 c = float2(0,0);
     float2 d = float2(1,0);
 
-    // gradients
-    // float cornerX = row * uvsPerRow;
-    // float cornerY = column * uvsPerCol;
+    // square origin
+    float2 o = float2(row * height, column * width);
 
-    // float2 gradientA = gradient(cornerX, cornerY + uvsPerRow);
-    // float2 gradientB = gradient(cornerX + uvsPerCol, cornerY + uvsPerRow);
-    // float2 gradientC = gradient(cornerX, cornerY);
-    // float2 gradientD = gradient(cornerX + uvsPerCol, cornerY);
+    // gradients
+    float2 gA = gradient(o.x, o.y + height);
+    float2 gB = gradient(o.x + width, o.y + height);
+    float2 gC = gradient(o.x, o.y);
+    float2 gD = gradient(o.x + width, o.y);
+
+    // translate point to local square coordinates
+    float2 p = float2(
+        (pixel.x % width) / width,
+        (pixel.y % height) / height
+    );
 
     // dot
     float2 ap = p - a;
-    float dotA = dot(ap, gradientA);
+    float dotA = dot(ap, gA);
     float2 bp = p - b;
-    float dotB = dot(bp, gradientB);
+    float dotB = dot(bp, gB);
     float2 cp = p - c;
-    float dotC = dot(cp, gradientC);
+    float dotC = dot(cp, gC);
     float2 dp = p - d;
-    float dotD = dot(dp, gradientD);
+    float dotD = dot(dp, gD);
 
     // interpolate
     float2 x1 = project(p, a, b);
@@ -105,8 +114,23 @@ float perlin(
     float dot2 = interpolate(dotC, dotD, w2);
 
     float2 x3 = project(p, x1, x2);
-    float w3 = weight(x3, x1, x2);
+    float w3 = weight(p, x1, x2);
     float dot3 = interpolate(dot1, dot2, w3); // from -1 to 1
 
-    return (dot3 * 0.5) + 0.5; // from 0 to 1
+    float noise = (dot3 * 0.5) + 0.5; // from 0 to 1
+    fixed4 color = fixed4(1,1,1,1) * noise;
+
+    // debug gradients
+    if(debugGradients && isGradientDebugLine(p, a, b, c, d, gA, gB, gC, gD))
+    {
+        return fixed4(1,0,0,1);
+    }
+
+    // debug squares
+    if(debugSquares && isSquareDebugLine(p))
+    {
+        return fixed4(0,0,1,1);
+    }
+
+    return color;
 }

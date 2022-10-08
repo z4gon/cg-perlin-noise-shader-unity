@@ -2,8 +2,10 @@ Shader "Unlit/29_PerlinNoise_Shader_Unlit"
 {
     Properties
     {
-        _TilingColumns("Tiling Columns", Integer) = 10
-        _TilingRows("Tiling Rows", Integer) = 10
+        _TilingColumns("Tiling Columns", Float) = 10
+        _TilingRows("Tiling Rows", Float) = 10
+        [Toggle] _DebugSquares("Debug Squares", Float) = 0
+        [Toggle] _DebugGradients("Debug Gradients", Float) = 0
     }
     SubShader
     {
@@ -22,22 +24,17 @@ Shader "Unlit/29_PerlinNoise_Shader_Unlit"
 
             int _TilingColumns;
             int _TilingRows;
+            bool _DebugSquares;
+            bool _DebugGradients;
 
             fixed4 frag (v2f i) : SV_Target
             {
                 float2 p = i.uv;
 
-                float perlinNoise = perlin(
-                    p,
-                    float2(0,1),
-                    float2(0,1),
-                    float2(-1,1),
-                    float2(1,-1)
-                );
+                fixed4 color = fixed4(1,1,1,1);
+                fixed4 noise = perlin(p, _TilingColumns, _TilingRows, _DebugSquares, _DebugGradients);
 
-                // float perlinNoise = perlin(p, _TilingColumns, _TilingRows)
-
-                return fixed4(1,1,1,1) * perlinNoise;
+                return color * noise;
             }
             ENDCG
         }
