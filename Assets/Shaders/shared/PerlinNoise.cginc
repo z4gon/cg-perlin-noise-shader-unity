@@ -22,17 +22,19 @@ float fade(float t)
 // pseudo random gradients
 float2 gradient(int seed)
 {
-    int m = seed & 4;
+    // int m = seed & 4;
 
-    if(m == 0){
-        return float2(1.0,1.0);
-    } else if(m == 1){
-        return float2(-1.0,1.0);
-    } else if(m == 2){
-        return float2(-1.0,-1.0);
-    } else {
-        return float2(1.0,-1.0);
-    }
+    // if(m == 0){
+    //     return float2(1.0,1.0);
+    // } else if(m == 1){
+    //     return float2(-1.0,1.0);
+    // } else if(m == 2){
+    //     return float2(-1.0,-1.0);
+    // } else {
+    //     return float2(1.0,-1.0);
+    // }
+
+    return float2(sin(seed), cos(seed));
 }
 
 // perlin noise 0 to 1
