@@ -29,10 +29,10 @@ Shader "Unlit/29_PerlinNoise_Shader_Unlit"
 
             fixed4 frag (v2f i) : SV_Target
             {
-                float2 p = i.uv;
+                float2 uv = i.uv;
 
                 fixed4 color = fixed4(1,1,1,1);
-                fixed4 noise = perlin(p, _TilingColumns, _TilingRows, _DebugSquares, _DebugGradients);
+                fixed4 noise = perlin(uv, _TilingColumns, _TilingRows, _DebugSquares, _DebugGradients);
 
                 return color * noise;
             }

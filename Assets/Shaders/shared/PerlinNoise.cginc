@@ -1,64 +1,42 @@
 #include "./Random.cginc"
+// Upgrade NOTE: excluded shader from DX11, OpenGL ES 2.0 because it uses unsized arrays
+#pragma exclude_renderers d3d11 gles
 #include "./PerlinNoiseDebug.cginc"
 
 // S shaped curve for fading values given t between 0 and 1
 float fade(float t)
 {
-    return 6 * pow(t, 5) - 15 * pow(t, 4) + 10 * pow(t, 3);
+    return (6 * pow(t, 5)) - (15 * pow(t, 4)) + (10 * pow(t, 3));
 }
 
 // interpolates the two values given a weight
 // uses the fade function to transform the weight
 float interpolate(float a, float b, float w)
 {
-    return lerp(a, b, fade(w));
-}
-
-// projects the point p onto the segment (a,b)
-float2 project(float2 p, float2 a, float2 b)
-{
-    float2 ab = b - a;
-    float2 ap = p - a;
-
-    float d = dot(ap, ab);
-    float2 ax = ab * (d / length(ab));
-
-    float2 x = a + ax;
-
-    return x;
-}
-
-// calculates interpolation weight between two points a,b
-// given a point x that belongs to the segment
-float weight(float2 x, float2 a, float2 b)
-{
-    return length(x - a) / length(b - a);
+    return lerp(a, b, w);
 }
 
 // pseudo random gradients
-float2 gradient(float x, float y)
+float2 gradient(int seed)
 {
-    float index = floor(random(x, y) * 10) % 4;
-    // float index = floor(random(x, y) * 10) % 4;
+    int m = seed & 4;
 
-    float2 gradients[] = {
-        float2(-1,1),
-        float2(1,1),
-        float2(1,-1),
-        float2(-1,-1),
-        // float2(0, sqrt(2)),
-        // float2(sqrt(2), 0),
-        // float2(0, -sqrt(2)),
-        // float2(-sqrt(2), 0)
-    };
-
-    return gradients[index];
+    if(m == 0){
+        return float2(1.0,1.0);
+    } else if(m == 1){
+        return float2(-1.0,1.0);
+    } else if(m == 2){
+        return float2(-1.0,-1.0);
+    } else {
+        return float2(1.0,-1.0);
+    }
 }
+
 
 // perlin noise 0 to 1
 // https://adrianb.io/2014/08/09/perlinnoise.html
 fixed4 perlin(
-    float2 pixel,
+    float2 uv,
     int columns,
     int rows,
     bool debugSquares,
@@ -66,68 +44,69 @@ fixed4 perlin(
 )
 {
     // square dimensions
-    float width = 1 / float(columns);
-    float height = 1 / float(rows);
+    float squareWidth = 1 / float(columns);
+    float squareHeight = 1 / float(rows);
 
     // current square
-    int column = floor(pixel.x / width);
-    int row = floor(pixel.y / height);
+    int column = floor(uv.x / squareWidth);
+    int row = floor(uv.y / squareHeight);
 
     // corners
-    float2 a = float2(0,1);
-    float2 b = float2(1,1);
-    float2 c = float2(0,0);
-    float2 d = float2(1,0);
+    float2 topLeft = float2(0.0,1.0);
+    float2 topRight = float2(1.0,1.0);
+    float2 bottomLeft = float2(0.0,0.0);
+    float2 bottomRight = float2(1.0,0.0);
 
-    // square origin
-    float2 o = float2(row * height, column * width);
+    // get index for the lookup table
+    int X = column % 8;
+    int Y = row % 8;
+
+    int P[16] = {0,1,2,3,4,5,6,7,0,1,2,3,4,5,6,7};
+
+    // return fixed4(T[X]/1000.0, T[Y]/1000.0, 0,1);
 
     // gradients
-    float2 gA = gradient(o.x, o.y + height);
-    float2 gB = gradient(o.x + width, o.y + height);
-    float2 gC = gradient(o.x, o.y);
-    float2 gD = gradient(o.x + width, o.y);
+    float2 gradientTopLeft = gradient(P[P[X] + Y+1]);
+    float2 gradientTopRight = gradient(P[P[X+1] + Y+1]);
+    float2 gradientBottomLeft = gradient(P[P[X] + Y]);
+    float2 gradientBottomRight = gradient(P[P[X+1] + Y]);
 
     // translate point to local square coordinates
-    float2 p = float2(
-        (pixel.x % width) / width,
-        (pixel.y % height) / height
+    float2 localPoint = float2(
+        (uv.x % squareWidth) / squareWidth,
+        (uv.y % squareHeight) / squareHeight
     );
 
+    // distances
+    float2 distanceTopLeft = localPoint - topLeft;
+    float2 distanceTopRight = localPoint - topRight;
+    float2 distanceBottomLeft = localPoint - bottomLeft;
+    float2 distanceBottomRight = localPoint - bottomRight;
+
     // dot
-    float2 ap = p - a;
-    float dotA = dot(ap, gA);
-    float2 bp = p - b;
-    float dotB = dot(bp, gB);
-    float2 cp = p - c;
-    float dotC = dot(cp, gC);
-    float2 dp = p - d;
-    float dotD = dot(dp, gD);
+    float dotTopLeft = dot(distanceTopLeft, gradientTopLeft);
+    float dotTopRight = dot(distanceTopRight, gradientTopRight);
+    float dotBottomLeft = dot(distanceBottomLeft, gradientBottomLeft);
+    float dotBottomRight = dot(distanceBottomRight, gradientBottomRight);
 
     // interpolate
-    float2 x1 = project(p, a, b);
-    float w1 = weight(x1, a, b);
-    float dot1 = interpolate(dotA, dotB, w1);
+    float interpolatedDot = interpolate(
+        interpolate(dotTopLeft, dotTopRight, localPoint.x),
+        interpolate(dotBottomLeft, dotBottomRight, localPoint.x),
+        localPoint.y
+    );
 
-    float2 x2 = project(p, c, d);
-    float w2 = weight(x2, c, d);
-    float dot2 = interpolate(dotC, dotD, w2);
-
-    float2 x3 = project(p, x1, x2);
-    float w3 = weight(p, x1, x2);
-    float dot3 = interpolate(dot1, dot2, w3); // from -1 to 1
-
-    float noise = (dot3 * 0.5) + 0.5; // from 0 to 1
+    float noise = (interpolatedDot * 0.5) + 0.5; // from 0 to 1
     fixed4 color = fixed4(1,1,1,1) * noise;
 
     // debug gradients
-    if(debugGradients && isGradientDebugLine(p, a, b, c, d, gA, gB, gC, gD))
+    if(debugGradients && isGradientDebugLine(localPoint, topLeft, topRight, bottomLeft, bottomRight, gradientTopLeft, gradientTopRight, gradientBottomLeft, gradientBottomRight))
     {
         return fixed4(1,0,0,1);
     }
 
     // debug squares
-    if(debugSquares && isSquareDebugLine(p))
+    if(debugSquares && isSquareDebugLine(localPoint))
     {
         return fixed4(0,0,1,1);
     }
