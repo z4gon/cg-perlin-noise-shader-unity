@@ -13,6 +13,7 @@ Material:
   m_InvalidKeywords:
   - _DEBUGGRADIENTS_ON
   - _DEBUGSQUARES_ON
+  - _USETIME_ON
   m_LightmapFlags: 4
   m_EnableInstancingVariants: 0
   m_DoubleSidedGI: 0
@@ -74,13 +75,16 @@ Material:
     - _Metallic: 0
     - _Mode: 0
     - _OcclusionStrength: 1
+    - _Offset: 0.35
     - _Parallax: 0.02
     - _SmoothnessTextureChannel: 0
     - _SpecularHighlights: 1
     - _SrcBlend: 1
     - _TilingColumns: 5
     - _TilingRows: 5
+    - _TimeVelocity: 2
     - _UVSec: 0
+    - _UseTime: 1
     - _ZWrite: 1
     m_Colors:
     - _Color: {r: 1, g: 1, b: 1, a: 1}

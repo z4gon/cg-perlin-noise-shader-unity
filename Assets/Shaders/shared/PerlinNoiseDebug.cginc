@@ -25,7 +25,7 @@ float isGradientDebugLine(float2 p, float2 corner, float2 gradient, float lineTh
     // based on a coordinate system centered on the corner
     // y = gradient.y * x
 
-    if(length(d) < 0.05 || 0.5 < length(d))
+    if(0.5 < length(d))
     {
         return 0;
     }

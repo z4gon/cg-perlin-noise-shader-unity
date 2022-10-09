@@ -20,21 +20,9 @@ float fade(float t)
 }
 
 // pseudo random gradients
-float2 gradient(int seed)
+float2 gradient(int seed, float time)
 {
-    // int m = seed & 4;
-
-    // if(m == 0){
-    //     return float2(1.0,1.0);
-    // } else if(m == 1){
-    //     return float2(-1.0,1.0);
-    // } else if(m == 2){
-    //     return float2(-1.0,-1.0);
-    // } else {
-    //     return float2(1.0,-1.0);
-    // }
-
-    return float2(sin(seed), cos(seed));
+    return float2(sin(seed + time), cos(seed + time));
 }
 
 // perlin noise 0 to 1
@@ -43,8 +31,10 @@ fixed4 perlin(
     float2 uv,
     int columns,
     int rows,
-    bool debugSquares,
-    bool debugGradients
+    float time = 1,
+    float offset = 0.5,
+    bool debugSquares = false,
+    bool debugGradients = false
 )
 {
     // square dimensions
@@ -66,10 +56,10 @@ fixed4 perlin(
     int Y = row % 256;
 
     // gradients
-    float2 gradientTopLeft = gradient(P[P[X] + Y+1]);
-    float2 gradientTopRight = gradient(P[P[X+1] + Y+1]);
-    float2 gradientBottomLeft = gradient(P[P[X] + Y]);
-    float2 gradientBottomRight = gradient(P[P[X+1] + Y]);
+    float2 gradientTopLeft = gradient(P[P[X] + Y+1], time);
+    float2 gradientTopRight = gradient(P[P[X+1] + Y+1], time);
+    float2 gradientBottomLeft = gradient(P[P[X] + Y], time);
+    float2 gradientBottomRight = gradient(P[P[X+1] + Y], time);
 
     // translate point to local square coordinates
     float2 localPoint = float2(
@@ -98,7 +88,7 @@ fixed4 perlin(
         w.y
     );
 
-    float noise = (interpolatedDot * 0.5) + 0.5; // from 0 to 1
+    float noise = (interpolatedDot * 0.5) + offset;
     fixed4 color = fixed4(1,1,1,1) * noise;
 
     // debug gradients
