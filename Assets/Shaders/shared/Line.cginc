@@ -1,13 +1,13 @@
-float onLine(float x, float y, float lineWidth)
+float onLine(float y, float fx, float lineWidth)
 {
     float halfLineWidth = lineWidth * 0.5;
 
-    // returns 1 when (x,y) is in the line: x = y
+    // returns 1 when (x,y) is in the line: y = fx
     return step(
-        x - halfLineWidth,
+        fx - halfLineWidth,
         y
     ) - step(
-        x + halfLineWidth,
+        fx + halfLineWidth,
         y
     );
 }

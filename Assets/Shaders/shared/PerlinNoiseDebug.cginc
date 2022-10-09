@@ -40,7 +40,11 @@ float isGradientDebugLine(float2 p, float2 corner, float2 gradient, float lineTh
         return 0;
     }
 
-    return onLine(d.y, sign(gradient.x) * gradient.y * d.x, lineThickness);
+    float deltaY = sign(gradient.x) * gradient.y;
+    float deltaX = sign(gradient.x) * gradient.x;
+    float slope = deltaY / deltaX;
+
+    return onLine(d.y, slope * d.x, lineThickness);
 }
 
 float isGradientDebugLine(
