@@ -2,14 +2,10 @@
 
 A Perlin Noise Shader written in **Cg** for the **Built-in RP** in Unity.
 
-1. [Perlin Noise](#perlin-noise)
+1. [Implementation](#implementation)
 1. [Random Noise](#random-noise)
 
-## Perlin Noise
-
-[Perlin Noise Explained by Fataho](https://www.youtube.com/watch?v=MJ3bvCkHJtE)
-[Perlin Noise: A Procedural Generation Algorithm](https://rtouti.github.io/graphics/perlin-noise-algorithm)
-[Understanding Perlin Noise](https://adrianb.io/2014/08/09/perlinnoise.html)
+## Implementation
 
 - Slice the surface in a grid of rectangles, given the amount of columns and rows.
 - Assign a pseudo-random gradient vector of magnitude 1, to each cross point in the grid.
@@ -110,3 +106,9 @@ float random(float2 pixel, float seed)
 ```
 
 ![Gif](./docs/27.gif)
+
+## References
+
+- [Perlin Noise Explained by Fataho](https://www.youtube.com/watch?v=MJ3bvCkHJtE)
+- [Perlin Noise: A Procedural Generation Algorithm](https://rtouti.github.io/graphics/perlin-noise-algorithm)
+- [Understanding Perlin Noise](https://adrianb.io/2014/08/09/perlinnoise.html)
